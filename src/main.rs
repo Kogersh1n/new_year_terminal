@@ -2,12 +2,15 @@ use crossterm::{
     cursor,
     event::{self, Event, KeyCode},
     execute, queue,
-    style::{Print, SetForegroundColor},
+    style::{Color, Colored::ForegroundColor, Print, ResetColor, SetForegroundColor},
     terminal,
 };
 use rand::Rng;
-use std::io::{Stdout, Write, stdout};
 use std::time::Duration;
+use std::{
+    hint,
+    io::{Stdout, Write, stdout},
+};
 
 struct Flake {
     x: f32,
@@ -63,19 +66,32 @@ fn draw_xmas_tree(w: u16, h: u16, out: &mut Stdout) -> std::io::Result<()> {
     let start: u16 = h - height - trunk;
     let mid: u16 = w / 2;
 
+    queue!(
+        out,
+        SetForegroundColor(Color::Yellow),
+        cursor::MoveTo(mid, start.saturating_sub(1)),
+        Print('★')
+    )?;
+
     for i in 0..height {
         let some_string = "^".repeat((i * 2 + 1) as usize);
-        queue!(out, cursor::MoveTo(mid - i, start + i), Print(some_string))?;
+        queue!(
+            out,
+            SetForegroundColor(Color::Green),
+            cursor::MoveTo(mid - i, start + i),
+            Print(some_string)
+        )?;
     }
 
     for i in 0..trunk {
         let trunk_image = "###";
         queue!(
             out,
+            SetForegroundColor(Color::DarkYellow),
             cursor::MoveTo(mid - 1, height + start + i),
             Print(trunk_image)
         )?;
     }
-
+    queue!(out, ResetColor)?;
     Ok(())
 }
